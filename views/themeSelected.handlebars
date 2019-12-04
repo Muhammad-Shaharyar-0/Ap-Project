@@ -52,7 +52,7 @@
         <div class="col-12 col-lg-5 col-xl-5 col-md-6 venue ">
             <p class="title" style="font-size: 13px;margin-bottom: 0px;">VENUE</p>
             <h4 class="text-center">{{venue.Name}}</h4>
-            <p class="subTitle" style="color: black;">{{venue.Adderss}}<span class="seprator"> | </span>  {{user.Phone}} <span  class="seprator"> | </span><span class="link">{{user.Website}}</span></p>
+            <p class="subTitle" style="color: black;">{{venue.Address}}<span class="seprator"> | </span>   {{user.Phone}}  <span  class="seprator"> | </span><span class="link">{{user.Website}}</span></p>
                 
         </div>
         <div class="col-12 col-lg-3 col-xl-3 col-md-3 text-center " style="margin-top: 20px">
@@ -70,12 +70,12 @@
                 <div class="form-row pb-2">
                     <div class="form-group1 col-md-6 col-6">
                         <label for="inputEmail4">Email</label>
-                        <input type="text" class="form-control1 col-lg-12" id="inputEmail4" name="email" placeholder="Enter Email">
+                        <input type="text" class="form-control1 col-lg-12" id="inputEmail4" name="email" placeholder="Enter Email" required="">
                     </div>
 
                     <div class="form-group1 col-md-6 col-6">
                         <label for="inputEmail4">Parent Name</label>
-                         <input type="text" class="form-control1 col-lg-12" id="inputEmail4" name="pname" placeholder="Parent Name">
+                         <input type="text" class="form-control1 col-lg-12" id="inputEmail4" name="pname" placeholder="Parent Name" required="">
                  
                     </div>
                 </div>
@@ -83,12 +83,12 @@
                     <div class="form-row">
                         <div class="form-group1 col-6 col-md-6">
                         <label for="inputEmail4">Child Name</label>
-                        <input type="text" class="form-control1 col-lg-12" id="inputEmail4" name="cname" placeholder="Child Name">
+                        <input type="text" class="form-control1 col-lg-12" id="inputEmail4" name="cname" placeholder="Child Name" required="">
                         </div>
 
                         <div class="form-group1 col-6 col-md-6">
                         <label for="inputEmail4">Phone</label>
-                         <input type="text" class="form-control1 col-lg-12" id="inputEmail4" name="phone"  placeholder="123-345677">
+                         <input type="text" class="form-control1 col-lg-12" id="inputEmail4" name="phone"  placeholder="123-345677" required="">
                         </div>
                     </div>
                     <div class="form-group1 ">
@@ -96,7 +96,7 @@
                          
                     </div>
                      <div class="form-group1 col-6 col-md-6">
-                       <input id='dt' class="form-control1" name="date" />{{#if Flag}}Date Already Booked{{/if}}
+                       <input id='dt' class="form-control1" required="" name="date"  />{{#if Flag}}Date is Already Booked{{/if}}
                        </div>
                      <div class="entry">
                             <input type="submit" value="PAY & BOOK PARTY" href="#" class="col-10 loginBtn mt-3 ml-4" style=" color :Blue;">

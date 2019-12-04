@@ -18,6 +18,7 @@ router.post('/signin',(req,res)=>{
     firebase.auth().signInWithEmailAndPassword(req.body.email,req.body.password).then((cred)=>{
         res.redirect('/changelayouts/'+req.body.email)
    }).catch(err=>{
+        res.redirect('/');
         console.log(err);
    });
    
@@ -54,10 +55,16 @@ router.post('/signup',(req,res)=>{
         Email: req.body.Email,
         Website: req.body.Website
     });
+    firebase.auth().signInWithEmailAndPassword(req.body.Email,req.body.Passowrd).then((cred)=>{
+        res.redirect('/changelayouts/'+req.body.Email)
+   }).catch(err=>{
+        res.redirect('/');
+        console.log(err);
+   });
     }).catch(err=>{
-     console.log(err);
+     res.redirect('/');
     });
-    res.redirect('/');
+    
 
 });
 

@@ -31,19 +31,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 
+
+//Main Page
 app.get('/', (req, res) => {
 
     Themes = [];
-    var Featuredvenues=[];
-    var normalvenues=[];
-    var Allvenues = [];
     let venueRef = db.collection('venue');
     let Allvenueref = venueRef.get()
       .then(snapshot => {
         snapshot.forEach(doc => {
           if (flag == 0) {
             Allvenues.push(doc.data());
+       
            var x = true;
+           //Checking If Venue Is Featured Or Not Also Checking It Expiry Date
            if(doc.data().Featured==x)
            {
              if(doc.data().Expire==moment().format("YYYY-MM-D"))
@@ -66,6 +67,7 @@ app.get('/', (req, res) => {
       }).then(function () {
         // console.log(venues);
         res.render('home', { venues: Featuredvenues,Nvenues: normalvenues })
+        flag=1;
         // res.render('BookedParties')
       }
       )
@@ -73,10 +75,11 @@ app.get('/', (req, res) => {
         console.log('Error getting documents', err);
       });
 });
+
+//Main Scress For Hos After Loggingin 
 app.get('/Host', (req, res) => {
 
     Themes = [];
-    var yourvenues=[];
     let venueRef = db.collection('venue');
     let Allvenues = venueRef.where('Owner','==',currentuser.Name).get()
       .then(snapshot => {
@@ -88,6 +91,7 @@ app.get('/Host', (req, res) => {
       }).then(function () {
         // console.log(venues);
         res.render('Host', { venues: yourvenues })
+        flag=1;
       }
       )
       .catch(err => {
@@ -96,9 +100,10 @@ app.get('/Host', (req, res) => {
 
 });
 
+//Chaning Navigation Bar After User logsIn
 app.get('/changelayouts/:email', (req, res) => {
 
-    venues=[];
+    yourvenues=[];
     app.engine('handlebars', exphbs({ defaultLayout: 'Host' }));
     layout=1;
     flag=0;
@@ -122,75 +127,71 @@ app.get('/changelayouts/:email', (req, res) => {
 
 });
 
+//Chaning Navigation Bar After User logs out
 app.get('/changelayouts', (req, res) => {
 
-
-    venues=[];
+    normalvenues=[];
+    Allvenues=[];
+    Featuredvenues=[];
+    flag=0;
     app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
     layout=0;
     res.redirect('/')
- 
 
-});
-
-app.get('/ContactUs', (req, res) => {
-
-  flag = 1;
-  res.render('ContactUs')
 });
 
 app.post('/search', (req, res) => {
 
-  if(req.body.vName==="")
-  {
-    search=Allvenues.filter(venue => venue.City.toUpperCase().includes(req.body.vCity.toUpperCase()))
-    if(layout==0)
-    {
-      res.render('search', { venues: Featuredvenues,Nvenues: normalvenues })
-    }
-    else
-    {
-      res.render('Host', { venues: search })
-    }
-  }
-  else if(req.body.vCity==="")
-  {
-    search=Allvenues.filter(venue => venue.Name.toUpperCase().includes(req.body.vName.toUpperCase()))
-    if(layout==0)
-    {
+  if (layout == 0) {
+    if (req.body.vName == "") {
+      search = Allvenues.filter(venue => venue.City.toUpperCase().includes(req.body.vCity.toUpperCase()))
+
       res.render('search', { venues: search })
     }
-    else
-    {
-      res.render('Host', { venues: search })
-    }
-  }
-  else if(req.body.vCity==="" && req.body.vName==="")
-  {
-    if(layout==0)
-    {
+    else if (req.body.vCity == "") {
+      search = Allvenues.filter(venue => venue.Name.toUpperCase().includes(req.body.vName.toUpperCase()))
+
       res.render('search', { venues: search })
     }
-    else
-    {
-      res.render('Host', { venues: search })
+    else if (req.body.vCity == "" && req.body.vName == "") {
+
+      res.render('search', { venues: Allvenues })
+
+    }
+    else {
+      search = Allvenues.filter(venue => venue.City.toUpperCase().includes(req.body.vCity.toUpperCase()) && venue.Name.toUpperCase().includes(req.body.vName.toUpperCase()))
+
+      res.render('search', { venues: search })
     }
   }
+  //If A user Is Signed Search is restricted to his venues
   else
   {
-    search=Allvenues.filter(venue => venue.City.toUpperCase().includes(req.body.vCity.toUpperCase()) && venue.Name.toUpperCase().includes(req.body.vName.toUpperCase()))
-    if(layout==0)
-    {
+    if (req.body.vName == "") {
+      search = yourvenues.filter(venue => venue.City.toUpperCase().includes(req.body.vCity.toUpperCase()))
+
       res.render('search', { venues: search })
     }
-    else
-    {
-      res.render('Host', { venues: search })
+    else if (req.body.vCity == "") {
+      search = yourvenues.filter(venue => venue.Name.toUpperCase().includes(req.body.vName.toUpperCase()))
+
+      res.render('search', { venues: search })
+    }
+    else if (req.body.vCity == "" && req.body.vName == "") {
+
+      res.render('search', { venues: yourvenues })
+
+    }
+    else {
+
+      search = yourvenues.filter(venue => venue.City.toUpperCase().includes(req.body.vCity.toUpperCase()) && venue.Name.toUpperCase().includes(req.body.vName.toUpperCase()))
+
+      res.render('search', { venues: search })
     }
   }
-
 });
 
+//Setting A Venue To be Featured
 app.get('/Featured', (req, res) => {
 
     var x=true;
@@ -199,12 +200,17 @@ app.get('/Featured', (req, res) => {
       Featured: x,
       Expire: moment().add(1, 'Month').format("YYYY-MM-D")
     }, { merge: true });
+
+    res.redirect('/Host')
 })
 
+// Payement For Getting Your Venue Featured
 app.get('/Fpayment', (req, res) => {
 
   res.render('Fpayment',{venue})
 })
+
+
 app.get('/selectTheme/:name', (req, res) => {
 
         
@@ -296,7 +302,7 @@ app.get('/selectTheme', (req, res) => {
 
 app.get('/hostTheme', (req, res) => {
 
-  var x= true;
+  var x= false;
   if(venue.Featured == x)
   {
     res.render('hostTheme',{venue,Themes,Flag: "0"})
@@ -306,6 +312,7 @@ app.get('/hostTheme', (req, res) => {
   Themes=[];
 });
 
+//After Theme is selected for a venue this gets the Booking page
 app.get('/themeSelected/:name', (req, res) => {
 
   let ThemeRef = db.collection('themes').doc(req.params.name);
@@ -319,11 +326,13 @@ app.get('/themeSelected/:name', (req, res) => {
       console.log('Error getting document', err);
     }).then(doc => {
 
+      console.log(venue.Owner);
       let ThemeRef = db.collection('users').doc(venue.Owner);
       let getDoc = ThemeRef.get()
         .then(doc => {
 
           user = doc.data();
+ 
           res.redirect('/themeSelected')
         })
         .catch(err => {
@@ -332,6 +341,7 @@ app.get('/themeSelected/:name', (req, res) => {
     });
 });
 
+//Adding theme to user's venues
 app.get('/AddTheme/:name', (req, res) => {
 
   
@@ -351,6 +361,8 @@ app.get('/AddTheme/:name', (req, res) => {
             Themes: [venue.Themes[0], req.params.name]
           }, { merge: true });
         }
+        flag=0;
+        yourvenues=[];
           res.redirect('/Host')
 
 });
@@ -360,6 +372,7 @@ app.get('/themeSelected', (req, res) => {
   res.render('themeSelected',{venue,user,theme})
 });
 
+// Booking Page When User Hasn't Selected A Theme
 app.get('/withoutTheme', (req, res) => {
   let ThemeRef = db.collection('users').doc(venue.Owner);
   let getDoc = ThemeRef.get()
@@ -373,6 +386,8 @@ app.get('/withoutTheme', (req, res) => {
     })
   
 });
+
+// Payment Page When User didn't Select A Theme
 app.post('/PaymentWithoutTheme', (req, res) => {
 
     Booking = {
@@ -389,6 +404,7 @@ app.post('/PaymentWithoutTheme', (req, res) => {
   res.render('PaymentWithoutTheme',{venue,Booking,user})
 });
 
+// Payment Page When User did Selecte A Theme
 app.post('/Payment', (req, res) => {
 
   var Flag=0;
@@ -404,7 +420,7 @@ app.post('/Payment', (req, res) => {
           Flag=1;
         })
       }).then(doc =>{
-
+        console.log(user);
         Booking = {
           Email: req.body.email,
           Pname: req.body.pname,
@@ -416,6 +432,7 @@ app.post('/Payment', (req, res) => {
           Theme: theme.Name,
           Owner: user.Name
         }
+        //Checking If The Booking Date Has Already Been Booked
         if(Flag==1)
         {
         res.render("themeSelected",{venue,user,theme,Flag: "0"})
@@ -428,7 +445,7 @@ app.post('/Payment', (req, res) => {
     
 });
 
-
+  //Final Processing of Payment And Booking with Theme Selected
 app.get('/final', (req, res) => {
 
   var id=uuid.v4();
@@ -448,6 +465,7 @@ app.get('/final', (req, res) => {
   res.redirect('/')
 });
 
+ //Final Processing of Payment And Booking without Theme Selected
 app.get('/finalwithouttheme', (req, res) => {
 
   console.log("as")
@@ -467,10 +485,14 @@ app.get('/finalwithouttheme', (req, res) => {
   res.redirect('/')
 });
 
+
+//Routes For Authentication
 app.use('/', require('./routes/Authentication'))
 
 
 
+
+//Creating A new Venue
 app.post('/Host',(req,res)=>{
 
   var s="images/"+req.body.myFile;
@@ -490,6 +512,8 @@ app.post('/Host',(req,res)=>{
   res.redirect('/Host');
 
 });
+
+
 app.get('/DeleteTheme/:name', (req, res) => {
 
   var temp=[];
@@ -503,9 +527,11 @@ app.get('/DeleteTheme/:name', (req, res) => {
       
  });
 
-app.get('/Themes/:name', (req, res) => {
+ // Showing Themes not selected by the user for a venue in order to add them
+ app.get('/Themes/:name', (req, res) => {
 
   console.log(venue)
+  Themes=[];
   if (venue.Themes.length == 0) {
     let venueRef = db.collection('themes');
     let Allvenueref = venueRef.get()
@@ -516,10 +542,7 @@ app.get('/Themes/:name', (req, res) => {
 
         });
       }).then(function () {
-        // console.log(venues);
         res.redirect('/AddThemes')
-
-        // res.render('BookedParties')
       }
       )
       .catch(err => {
@@ -528,12 +551,13 @@ app.get('/Themes/:name', (req, res) => {
 
   }
   else {
-      //Issue with For Loop So Hard Coding Due To Time Constraint
+
+      //For Loop not used As the Array is of only Two Elements Which are handled differently to each other
       let venueRef = db.collection('themes');
       let Allvenueref = venueRef.get()
       .then(snapshot => {
         snapshot.forEach(doc => {
-
+          
          if(venue.Themes.length ==1)
          {
           if (doc.data().Name.includes( venue.Themes[0])) {
@@ -544,33 +568,24 @@ app.get('/Themes/:name', (req, res) => {
             Themes.push(doc.data())
           }
         }
-          //console.log( Themes);
-          if ((venue.Themes.length == 1 && Themes.length==1) ||(venue.Themes.length == 2 && Themes.length==0)  ) {
             res.redirect('/AddThemes')
 
-          };
-
         });
-      }).then(function () {
-        // console.log(venues);
-       // res.redirect('/AddThemes')
-
-        // res.render('BookedParties')
-      }
-      )
-      .catch(err => {
+      }).catch(err => {
         console.log('Error getting documents', err);
       });
 
   }
 
 });
-
+// Add Themes Page For Venues
 app.get('/AddThemes', (req, res) => {
 
   res.render('AddThemes', {Themes,venue})
   Themes=[];
 });
+
+// Show All Boking of All user venues
 app.get('/Bookings', (req, res) => {
   Bookings = [];
   console.log(currentuser);
@@ -596,22 +611,18 @@ app.get('/Bookings', (req, res) => {
       console.log('Error getting documents', err);
     });
 
-
 });
-//static folder
 
 
+//static folder to Use Images and Tools
 app.use(express.static(path.join(__dirname, 'views')));
 
 const PORT = process.env.PORT || 1000;
 app.listen(PORT, () => console.log("server started on Port 1000"));
 
 
+//Variables used all automatically populated from data base when need in each event
 var flag = 0;
-var names = 'Tumbling';
-
-
-
 var search=[];
 var venue = {};
 var Themes=[];
